@@ -159,7 +159,7 @@ public:
 			  tempStr = "$7" + tempStr;
 		  }
 	  } else {
-		  if (tempStr[0] == '$' and tempStr[1] > '4') {
+		  if (tempStr[0] == '$' && tempStr[1] > '4') {
 			  // bad remains bad, but I don't think those good are good
 			  tempStr = tempStr.substr(2);
 		  }
