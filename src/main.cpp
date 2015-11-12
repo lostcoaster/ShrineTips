@@ -6,6 +6,7 @@
 #include "resource.h"
 #include <list>
 #include <algorithm>
+#include <fstream>
 
 struct KeyValue {
   std::string key;
@@ -133,8 +134,38 @@ public:
     if (!data) return false;
     if (!json::parse(data, effects)) return false;
 
+	// get my favourite affix, if there is no, forget it 
+	std::ifstream ifs("important_affix.txt");
+	std::list<std::string> goodThings;
+	std::string tempStr;
+	if (ifs) {
+		while (std::getline(ifs, tempStr)) {
+			goodThings.push_back(tempStr);
+		}
+	}
+	
+
     for (size_t i = 0; i < effects.length(); ++i) {
       if (effects[i].type() != json::Value::tArray) continue;
+
+	  // is this my favourite?
+	  tempStr = effects[i][0].getString();
+	  bool isMyFavourite = std::any_of(goodThings.begin(), goodThings.end(), [&tempStr](std::string str) {return (tempStr == str);});
+	  tempStr = effects[i][1].getString();
+	  if (isMyFavourite) {
+		  if (tempStr[0] == '$') {
+			  tempStr[1] = '7';  // my favourite is the bestest
+		  } else {
+			  tempStr = "$7" + tempStr;
+		  }
+	  } else {
+		  if (tempStr[0] == '$' and tempStr[1] > '4') {
+			  // bad remains bad, but I don't think those good are good
+			  tempStr = tempStr.substr(2);
+		  }
+	  }
+	  effects[i][1].setString(tempStr);
+
       for (size_t j = 2; j < effects[i].length(); ++j) {
         auto& reg = effects[i][j];
         if (reg.type() == json::Value::tArray) {
